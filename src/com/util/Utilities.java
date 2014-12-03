@@ -163,9 +163,9 @@ public class Utilities {
 	public void sieveOfEratosThenes(boolean[] prime, int N) {
 
 		int i;
-		int j;
+		long j;
 
-//		prime = new boolean[N + 1];
+		// prime = new boolean[N + 1];
 
 		for (i = 2; i < N + 1; i++) {
 			prime[i] = true;
@@ -173,23 +173,20 @@ public class Utilities {
 
 		for (i = 2; i < N + 1; i++) {
 
-			j = 2 * i;
-
 			if (!prime[i])
 				continue;
 
+			j = 1L * i * i;
+
 			while (j < N + 1) {
-
-				prime[j] = false;
-
+				prime[(int) j] = false;
 				j += i;
-
 			}
 
 		}
 
-		// for (i = 0; i < N; i++)
-		// System.out.println(i + ": " + prime[i]);
+		for (i = 0; i < N; i++)
+			System.out.println(i + ": " + prime[i]);
 
 	}
 
@@ -240,6 +237,52 @@ public class Utilities {
 		}
 	}
 
+	public int lowerBound(long[] array, int first, int last, long val) {
+
+		int count, step, it;
+
+		count = last - first + 1;
+
+		while (count > 0) {
+			it = first;
+			step = count / 2;
+			it += step;
+
+			if (array[it] < val) {
+				first = ++it;
+				count -= step + 1;
+			} else {
+				count = step;
+			}
+		}
+
+		return first;
+
+	}
+
+	public int upperBound(long[] array, int first, int last, long val) {
+		int count, step, it;
+
+		count = last - first + 1;
+
+		while (count > 0) {
+
+			it = first;
+			step = count / 2;
+			it += step;
+
+			if (!(val < array[it])) {
+				first = ++it;
+				count -= step + 1;
+			} else {
+				count = step;
+			}
+		}
+
+		return first;
+
+	}
+
 	public static void main(String[] args) {
 		int i;
 		int N;
@@ -260,13 +303,13 @@ public class Utilities {
 		}
 
 		System.out.println("Total number of subsets: " + count);
-		
+
 		boolean prime[];
 		prime = new boolean[1000000];
 		count = 0;
-		
+
 		util.sieveOfEratosThenes(prime, 100000);
-		
+
 		for (i = 0; i < 31700; i++) {
 			if (prime[i]) {
 				System.out.print(i + ",");
