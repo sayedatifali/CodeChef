@@ -1,5 +1,7 @@
 package com.util;
 
+import java.util.ArrayList;
+
 public class Utilities {
 
 	public boolean nextPerm(int[] a) {
@@ -126,7 +128,7 @@ public class Utilities {
 			s /= 2;
 		}
 		for (int i = 0; i < iteration; i++) {
-			long a = (long) Math.random() * p;
+			long a = (long) (Math.random() * (p - 1) + 1);
 			long temp = s;
 			long mod = modulo(a, temp, p);
 			while (temp != p - 1 && mod != 1 && mod != p - 1) {
@@ -164,8 +166,9 @@ public class Utilities {
 
 		int i;
 		long j;
+		ArrayList<Integer> allPrimeFactors;
 
-		// prime = new boolean[N + 1];
+		allPrimeFactors = new ArrayList<Integer>();
 
 		for (i = 2; i < N + 1; i++) {
 			prime[i] = true;
@@ -182,6 +185,8 @@ public class Utilities {
 				prime[(int) j] = false;
 				j += i;
 			}
+			
+			allPrimeFactors.add(i);
 
 		}
 

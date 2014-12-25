@@ -98,6 +98,10 @@ public class FasterScanner {
 		return res * sgn;
 	}
 
+	public double nextDouble() {
+		return Double.parseDouble(nextString());
+	}
+
 	public boolean isSpaceChar(int c) {
 		return c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == -1;
 	}
@@ -106,4 +110,148 @@ public class FasterScanner {
 		return c == '\n' || c == '\r' || c == -1;
 	}
 
+	public char[] nextCharArray(int N) {
+		int i;
+		char[] array;
+		String str;
+
+		array = new char[N];
+
+		i = 0;
+
+		str = nextLine();
+
+		for (i = 0; i < N && i < str.length(); i++) {
+			array[i] = str.charAt(i);
+		}
+
+		return array;
+	}
+
+	public char[][] nextChar2DArray(int M, int N) {
+		int i;
+		char[][] array;
+
+		array = new char[M][N];
+
+		i = 0;
+
+		for (i = 0; i < M; i++) {
+			array[i] = nextCharArray(N);
+		}
+
+		return array;
+	}
+
+	public int[] nextIntArray(int N) {
+		int i;
+		int[] array;
+
+		array = new int[N];
+
+		i = 0;
+
+		for (i = 0; i < N; i++) {
+			array[i] = nextInt();
+		}
+
+		return array;
+	}
+
+	public int[][] nextInt2DArray(int M, int N) {
+		int i;
+		int[][] array;
+
+		array = new int[M][N];
+
+		i = 0;
+
+		for (i = 0; i < M; i++) {
+			array[i] = nextIntArray(N);
+		}
+
+		return array;
+	}
+
+	public long[] nextLongArray(int N) {
+		int i;
+		long[] array;
+
+		array = new long[N];
+
+		i = 0;
+
+		for (i = 0; i < N; i++) {
+			array[i] = nextLong();
+		}
+
+		return array;
+	}
+
+	public long[][] nextLong2DArray(int M, int N) {
+		int i;
+		long[][] array;
+
+		array = new long[M][N];
+
+		i = 0;
+
+		for (i = 0; i < M; i++) {
+			array[i] = nextLongArray(N);
+		}
+
+		return array;
+	}
+
+	public double[] nextDoubleArray(int N) {
+		int i;
+		double[] array;
+
+		array = new double[N];
+
+		for (i = 0; i < N; i++) {
+			array[i] = nextDouble();
+		}
+
+		return array;
+	}
+
+	public double[][] nextDouble2DArray(int M, int N) {
+		int i;
+		double[][] array;
+
+		array = new double[M][N];
+
+		for (i = 0; i < M; i++) {
+			array[i] = nextDoubleArray(N);
+		}
+
+		return array;
+	}
+	
+	public String[] nextStringArray(int N) {
+		int i;
+		String [] array;
+		
+		array = new String[N];
+		
+		for (i = 0; i < N; i++) {
+			array[i] = nextString();
+		}
+		
+		return array;
+	}
+	
+	public String[][] nextString2DArray(int M, int N) {
+		int i;
+		String [][] array;
+		
+		array = new String[M][N];
+		
+		for (i = 0; i < M; i++) {
+			array[i] = nextStringArray(N);
+		}
+		
+		return array;
+	}
 }
