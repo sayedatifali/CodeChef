@@ -1,249 +1,338 @@
 package com.march14;
 
 import java.io.PrintWriter;
-
-public class AnuGCD {
-	
-	public static void main(String [] args) {
-		
-	}
-
-}
+import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
- * Segment Tree using index beginning from 1. The two children for a parent node
- * n are at 2n and 2n + 1
+ * http://www.codechef.com/MARCH14/problems/ANUGCD
  * 
- * @author doom
+ * AC in Codechef! :D :D
  * 
+ * Using segment trees
+ * 
+ * @author sultan.of.swing
+ *
  */
-class SegmentTree {
 
-	private int N;
-	private int TN;
-	private long A[];
-	private int Tree[];
+public class AnuGCD {
 
-	public SegmentTree(int N) {
+	public PrintWriter mOut;
+	public FasterScanner mFScanner;
+	public int N, M;
+	public int mA[];
+	public Node mSegTree[][];
+	public ArrayList<Integer> mPrimes;
+	public ArrayList<Integer> mPrimeIndexes[];
+	public int mSmallPrimesLen;
+	public int mPrimesLen;
+	public int mPrimesId[];
+	public static final int sMaxNum = 100003;
+	public static final int sMaxPrime = 350;
+
+	public AnuGCD() {
+		mOut = new PrintWriter(System.out);
+		mFScanner = new FasterScanner();
+		mPrimesId = new int[sMaxNum];
+		mPrimes = new ArrayList<Integer>();
+	}
+
+	public int getMaxLen(int N) {
+		int max = N;
+
+		max |= (max >> 1);
+		max |= (max >> 2);
+		max |= (max >> 4);
+		max |= (max >> 8);
+		max |= (max >> 16);
+
+		max = (max + 1) << 1;
+
+		return max;
+
+	}
+
+	public void initSegTree() {
 		int i;
-		TN = getTreeLength(N);
-		Tree = new int[TN + 1];
-		for (i = 0; i < TN; i++) {
-			Tree[i] = -1;
+		int size;
+
+		mSegTree = new Node[mPrimesLen][];
+
+		for (i = 0; i < mPrimesLen; i++) {
+			if (mPrimeIndexes[i].size() == 0)
+				continue;
+			size = getMaxLen(mPrimeIndexes[i].size());
+			mSegTree[i] = new Node[size];
 		}
 	}
 
-	public SegmentTree(long[] A) {
+	// Build seg tree on all the prime factors i.e. each prime factor has a
+	// segment tree over the values which are divisible by this prime factor
+	public void buildSegTree() {
 		int i;
+		int N;
 
-		N = A.length;
-
-		TN = getTreeLength(N);
-
-		this.A = new long[N];
-
-		Tree = new int[TN + 1];
-
-		for (i = 0; i < TN; i++) {
-			if (i < N)
-				this.A[i] = A[i];
-			Tree[i] = -1;
+		for (i = 0; i < mPrimesLen; i++) {
+			N = mPrimeIndexes[i].size();
+			if (N == 0)
+				continue;
+			buildSegTree(1, 0, N - 1, mPrimeIndexes[i], i);
 		}
-		constructSegmentTree(1, 0, N - 1);
 	}
 
-	public int getTreeLength(int N) {
-		int TN;
-		TN = N;
-		TN |= (TN >> 1);
-		TN |= (TN >> 2);
-		TN |= (TN >> 4);
-		TN |= (TN >> 8);
-		TN |= (TN >> 16);
+	public void buildSegTree(int node, int begin, int end,
+			ArrayList<Integer> indexes, int segTree) {
 
-		TN = (TN + 1) << 1;
-
-		return TN;
-	}
-
-	public void printSegmentTree() {
-		int i;
-		System.out.println("\nPrinting Segment Tree of length " + TN + ":");
-		for (i = 0; i < TN; i++) {
-			System.out.print(Tree[i] + " ");
-		}
-		System.out.println();
-	}
-
-	public void printOriginalArray() {
-		printOriginalArray(A);
-	}
-
-	public void printOriginalArray(long [] A) {
-		int i;
-		System.out.println("\nPrinting original array of length: " + N + ":");
-		for (i = 0; i < N; i++)
-			System.out.print(A[i] + " ");
-		System.out.println();
-	}
-
-	public void constructSegmentTree(int node, int begin, int end) {
-		constructSegmentTree(node, begin, end, A);
-	}
-
-	public void constructSegmentTree(int node, int begin, int end, long[] A) {
 		int mid;
+		int index;
 
-		if (begin == end)
-			Tree[node] = begin;
-
-		else {
-			mid = begin + (end - begin) / 2;
-			constructSegmentTree(2 * node, begin, mid, A);
-			constructSegmentTree(2 * node + 1, mid + 1, end, A);
-
-			// System.out.println("node: " + node + "; begin: " + begin +
-			// "; end: " + end);
-
-			if (A[Tree[2 * node]] <= A[Tree[2 * node + 1]])
-				Tree[node] = Tree[2 * node];
-			else
-				Tree[node] = Tree[2 * node + 1];
-
-		}
-	}
-
-	public void updateValue(int index, long newVal) {
-		updateValue(index, newVal, A);
-	}
-
-	public void updateValue(int index, long newVal, long[] A) {
-
-		if (index < 0 || index >= N)
+		if (begin > end)
 			return;
 
-		A[index] = newVal;
-
-		update(1, 0, N - 1, index, A);
-
-	}
-
-	private void update(int node, int begin, int end, int index, long[] A) {
-		int mid;
-
-		if (index < begin || index > end)
+		if (begin == end) {
+			index = indexes.get(begin);
+			mSegTree[segTree][node] = new Node(index, mA[index], 1);
 			return;
-
-		if (begin == end)
-			Tree[node] = begin;
-
-		else {
-
-			mid = begin + (end - begin) / 2;
-
-			update(2 * node, begin, mid, index, A);
-			update(2 * node + 1, mid + 1, end, index, A);
-
-			if (A[Tree[2 * node]] <= A[Tree[2 * node + 1]])
-				Tree[node] = Tree[2 * node];
-			else
-				Tree[node] = Tree[2 * node + 1];
-
 		}
 
+		mid = begin + ((end - begin) >> 1);
+
+		buildSegTree(2 * node, begin, mid, indexes, segTree);
+		buildSegTree(2 * node + 1, mid + 1, end, indexes, segTree);
+
+		mSegTree[segTree][node] = new Node();
+
+		mSegTree[segTree][node].merge(mSegTree[segTree][2 * node],
+				mSegTree[segTree][2 * node + 1]);
+
 	}
 
-	public int query(int node, int i, int j) {
-		return query(node, 0, N - 1, i, j, A);
-	}
+	// Query by checking bounds in the Node struct. The startIndex and endIndex
+	// are the actual indexes in the original array containing the max value
+	// divisible by a prime factor.
+	public Node querySegTree(int node, int begin, int end, int qBegin,
+			int qEnd, int segTree) {
 
-	public int query(int node, int begin, int end, int i, int j, long[] A) {
-
-		int q1;
-		int q2;
 		int mid;
+		Node left, right, res;
 
-		if (i > end || j < begin)
-			return -1;
+		if (mSegTree[segTree] == null || qBegin > mSegTree[segTree][node].endIndex || qEnd < mSegTree[segTree][node].startIndex)
+			return null;
 
-		// System.out.println("node: " + node + "; begin: " + begin + "; end: "
-		// + end + "; i: " + i + "; j: " + j);
+		if (qBegin <= mSegTree[segTree][node].startIndex
+				&& qEnd >= mSegTree[segTree][node].endIndex)
+			return mSegTree[segTree][node];
 
-		if (i <= begin && j >= end)
-			return Tree[node];
+		mid = begin + ((end - begin) >> 1);
 
-		mid = begin + (end - begin) / 2;
+		left = querySegTree(2 * node, begin, mid, qBegin, qEnd, segTree);
+		right = querySegTree(2 * node + 1, mid + 1, end, qBegin, qEnd, segTree);
 
-		q1 = query(2 * node, begin, mid, i, j, A);
+		if (left == null)
+			return right;
+		if (right == null)
+			return left;
 
-		q2 = query(2 * node + 1, mid + 1, end, i, j, A);
+		res = new Node();
+		res.merge(left, right);
 
-		if (q1 == -1)
-			return q2;
+		return res;
+	}
 
-		if (q2 == -1)
-			return q1;
+	public void sieveOfErastothenes() {
+		int i;
+		long j;
+		int id;
+		boolean primes[];
 
-		if (A[q1] <= A[q2])
-			return q1;
+		primes = new boolean[sMaxNum];
+		Arrays.fill(mPrimesId, -1);
 
-		return q2;
+		for (i = 2; i < sMaxNum; i++)
+			primes[i] = true;
+
+		id = 0;
+
+		for (i = 2; i < sMaxNum; i++) {
+			if (!primes[i])
+				continue;
+			for (j = 1L * i * i; j < sMaxNum; j += i) {
+				primes[(int) j] = false;
+			}
+			mPrimes.add(i);
+			mPrimesId[i] = id++;
+		}
+
+		mSmallPrimesLen = 70;
+		mPrimesLen = mPrimes.size();
+	}
+
+	public void allocatePrimeIndexes() {
+		mPrimeIndexes = new ArrayList[mPrimesLen];
+		for (int i = 0; i < mPrimesLen; i++)
+			mPrimeIndexes[i] = new ArrayList<Integer>();
+	}
+
+	public void takeInput() {
+		N = mFScanner.nextInt();
+		M = mFScanner.nextInt();
+		mA = new int[N];
+		for (int i = 0; i < N; i++) {
+			mA[i] = mFScanner.nextInt();
+		}
+	}
+
+	public void processInput() {
+		int i;
+		int j;
+		int num;
+		int prime;
+		int id;
+
+		for (i = 0; i < N; i++) {
+			num = mA[i];
+
+			for (j = 0; j < mSmallPrimesLen; j++) {
+				prime = mPrimes.get(j);
+				if (num % prime == 0) {
+					mPrimeIndexes[j].add(i);
+					while (num % prime == 0) {
+						num /= prime;
+					}
+				}
+
+				if (num == 1 || mPrimesId[num] != -1)
+					break;
+			}
+
+			if (num > 1) {
+				// Prime number left over
+				id = mPrimesId[num];
+				mPrimeIndexes[id].add(i);
+			}
+
+		}
+	}
+
+	public void processQueries() {
+		int i;
+		int j;
+		int x;
+		int y;
+		int N;
+		int num;
+		int prime;
+		int id;
+		Node res;
+		Node ret;
+
+		res = new Node();
+
+		for (i = 0; i < M; i++) {
+			res.reset(-1, -1);
+			num = mFScanner.nextInt();
+			x = mFScanner.nextInt() - 1;
+			y = mFScanner.nextInt() - 1;
+
+			for (j = 0; j < mSmallPrimesLen; j++) {
+
+				prime = mPrimes.get(j);
+
+				if (num % prime == 0) {
+					N = mPrimeIndexes[j].size();
+					ret = querySegTree(1, 0, N - 1, x, y, j);
+					if (ret != null)
+						res.updateMax(ret);
+				}
+
+				while (num % prime == 0)
+					num /= prime;
+
+				if (num == 1 || mPrimesId[num] != -1)
+					break;
+			}
+
+			if (num > 1) {
+				id = mPrimesId[num];
+				N = mPrimeIndexes[id].size();
+				ret = querySegTree(1, 0, N - 1, x, y, id);
+				if (ret != null)
+					res.updateMax(ret);
+			}
+
+			mOut.print(res.max);
+			mOut.print(" ");
+			mOut.println(res.freq);
+		}
+	}
+
+	public void solve() {
+		sieveOfErastothenes();
+		takeInput();
+		allocatePrimeIndexes();
+		processInput();
+		initSegTree();
+		buildSegTree();
+		processQueries();
+		close();
+	}
+
+	public void close() {
+		mOut.flush();
+		mOut.close();
 	}
 
 	public static void main(String[] args) {
-		int i;
-		int j;
-		int N;
-		long A[];
-		FastScannerSlow fastScanner;
-		PrintWriter out;
-		SegmentTree segmentTree;
+		AnuGCD mSol = new AnuGCD();
+		mSol.solve();
+	}
 
-		fastScanner = new FastScannerSlow();
-		out = new PrintWriter(System.out);
+	class Node {
+		int startIndex;
+		int endIndex;
+		int max;
+		int freq;
 
-		System.out.println("Enter the length of the random array:");
-		N = fastScanner.nextInt();
-		A = new long[N];
-
-		out.println("Generated array:");
-
-		for (i = 0; i < N; i++) {
-			A[i] = (long) (Math.random() * 100);
-			out.print(A[i] + " ");
+		public Node() {
+			this.max = this.freq = -1;
 		}
 
-		out.flush();
+		// Stores index of the original array where the value max occurs
+		public Node(int index, int max, int freq) {
+			this.startIndex = this.endIndex = index;
+			this.max = max;
+			this.freq = freq;
+		}
 
-		segmentTree = new SegmentTree(A);
+		// Updates the max value in a range along with its frequency.
+		// The range is also updated by using the startIndex and endIndex
+		// information.
+		public void merge(Node node1, Node node2) {
+			if (node1.max > node2.max) {
+				this.max = node1.max;
+				this.freq = node1.freq;
+			} else if (node1.max < node2.max) {
+				this.max = node2.max;
+				this.freq = node2.freq;
+			} else {
+				this.max = node1.max;
+				this.freq = node1.freq + node2.freq;
+			}
+			this.startIndex = Math.min(node1.startIndex, node2.startIndex);
+			this.endIndex = Math.max(node1.endIndex, node2.endIndex);
+		}
 
-		segmentTree.printSegmentTree();
+		public void reset(int max, int freq) {
+			this.max = max;
+			this.freq = freq;
+		}
 
-		out.flush();
-
-		for (i = 0; i < N; i++) {
-			for (j = i; j < N; j++) {
-				out.println("Query range (" + i + " -> " + j + "): "
-						+ segmentTree.query(1, i, j));
+		public void updateMax(Node node) {
+			if (node.max > this.max) {
+				this.max = node.max;
+				this.freq = node.freq;
 			}
 		}
-		out.flush();
-		segmentTree.printSegmentTree();
-
-		segmentTree.updateValue(9, 0);
-		
-		segmentTree.printOriginalArray();
-		
-		for (i = 0; i < N; i++) {
-			for (j = i; j < N; j++) {
-				out.println("Query range (" + i + " -> " + j + "): "
-						+ segmentTree.query(1, i, j));
-			}
-		}
-		out.flush();
-		
-		segmentTree.printSegmentTree();
-		out.close();
 	}
 
 }
